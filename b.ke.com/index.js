@@ -25,6 +25,6 @@ http.createServer((req, res) => {
             }
 
     }
-}).listen(3001, function () {
-    console.log('a.ke.com running on 3001')
+}).listen(3002, function () {
+    console.log('b.ke.com running on 3002')
 })
