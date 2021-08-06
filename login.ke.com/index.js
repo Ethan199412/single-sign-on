@@ -1,53 +1,53 @@
 const http = require('http')
 const fs = require('fs')
 const querystring = require('querystring')
-const { getExpireTime, doesTokenExist, getRedirectUrl } = require('../utils.js')
-let redirectUrl
+const ejs = require('ejs')
+const { getExpireTime, doesTokenExist, getRedirectUrl, getCookieObj, getParam } = require('../utils.js')
+const { SessionHandler } = require('./session.js')
+const token = 'logInSuccessfulToken'
+
+const userDataBase = {
+
+}
 
 http.createServer((req, res) => {
     let { url, method } = req
-    //const redirectUrl = getRedirectUrl(url)
-    //console.log('redirectUrl',redirectUrl)
     pureUrl = url.split('?')[0]
 
     res.setHeader('Content-Type', 'text/html;charset=UTF-8')
-    //console.log('cookie', req.headers.cookie.split(';'))
     switch (pureUrl) {
         case '/login':
             switch (method) {
                 case 'GET':
-                    redirectUrl = getRedirectUrl(url)
+                    let redirectUrl = getRedirectUrl(url)
                     let isLogin = doesTokenExist(req.headers.cookie)
                     if (isLogin) {
                         res.end('您已登录')
                         return
                     }
-                    //console.log('[p2] isLogin', isLogin)
-                    const filePath = './view/login.html'
-                    //console.log('method', method)
-                    fs.readFile(filePath, (err, data) => {
+                    const filePath = './view/login.ejs'
+                    ejs.renderFile(filePath, { redirectUrl: redirectUrl }, null, function (err, str) {
                         if (err) {
                             res.end(err)
-                            return
+                        } else {
+                            res.end(str)
                         }
-                        res.end(data.toString())
                     })
                     break
             }
             break
-        case '/handleLogin':
+        case '/handle-login':
             let data = ''
             req.on('data', function (chunk) {
                 data += chunk
             })
             req.on('end', function () {
                 data = querystring.parse(data)
-                console.log('data', data, typeof data, data.userName, data.password)
-                if (data.userName === 'Ethan' && data.password === '123456') {
-                    let token = 'logInSuccessfulToken'
+                const { userName, password, redirectUrl } = data
+                if (userName === 'Ethan' && password === '123456') {
                     res.setHeader('Set-Cookie', `token=${token}; domain=ke.com; httpOnly=true; Expires= + ${getExpireTime()}`)
+                    userDataBase[token] = userName
                     if (redirectUrl) {
-                        console.log('[p2] redirectUrl', redirectUrl)
                         res.writeHead(302, { 'Location': `http://${redirectUrl}` })
                         res.end('redirecting...')
                         return
@@ -58,6 +58,18 @@ http.createServer((req, res) => {
                 }
             })
             break
+        case '/verify-token':
+            const param = getParam(url)
+            if (param.token === token) {
+                res.writeHead(200)
+                let obj = {
+                    code: 200,
+                    message: 'login in successful',
+                    userName: userDataBase[token]
+                }
+                res.end(JSON.stringify(obj))
+            }
+            break;
     }
 }).listen(3000, function () {
     console.log('login service is listening on 3000')

@@ -1,6 +1,8 @@
 const http = require('http')
 const fs = require('fs')
-const { doesTokenExist } = require('../utils.js')
+const { doesTokenExist, getCookieObj } = require('../utils.js')
+const Axios = require('axios')
+const ejs = require('ejs')
 
 http.createServer((req, res) => {
     const { url, method } = req
@@ -10,20 +12,29 @@ http.createServer((req, res) => {
     switch (pureUrl) {
         case '/':
             if (doesTokenExist(req.headers.cookie)) {
-                const filePath = './view/a.html'
-                fs.readFile(filePath, function (err, data) {
-                    if (err) {
-                        res.end(err)
-                    } else {
-                        res.end(data.toString())
+                let cookieObj = getCookieObj(req.headers.cookie)
+                Axios.get('http://my-login.ke.com:3000/verify-token', {
+                    params: {
+                        token: cookieObj.token
+                    }
+                }).then(response => {
+                    if (response.data.code === 200) {
+                        console.log('response data', response.data)
+                        const filePath = './view/b.ejs'
+                        
+                        ejs.renderFile(filePath, { userName: response.data.userName }, null, function (err, string) {
+                            if (err) {
+                                res.end(err)
+                            } else {
+                                res.end(string)
+                            }
+                        })
                     }
                 })
             } else {
-                console.log('origin', req.headers.host)
-                res.writeHead(302, { 'Location': 'http://login.ke.com:3000/login?redirectUrl=' + req.headers.host }) // 重定向
+                res.writeHead(302, { 'Location': 'http://my-login.ke.com:3000/login?redirectUrl=' + req.headers.host }) // 重定向
                 res.end('<div>未登录</div>')
             }
-
     }
 }).listen(3002, function () {
     console.log('b.ke.com running on 3002')
