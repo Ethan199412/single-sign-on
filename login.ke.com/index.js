@@ -22,6 +22,10 @@ http.createServer((req, res) => {
                     let redirectUrl = getRedirectUrl(url)
                     let isLogin = doesTokenExist(req.headers.cookie)
                     if (isLogin) {
+                        console.log('[p2] redirectUrl', redirectUrl)
+                        if (redirectUrl) {
+                            res.writeHead(302, { Location: `http://${redirectUrl}?token=${token}` })
+                        }
                         res.end('您已登录')
                         return
                     }
@@ -47,8 +51,9 @@ http.createServer((req, res) => {
                 if (userName === 'Ethan' && password === '123456') {
                     res.setHeader('Set-Cookie', `token=${token}; domain=ke.com; httpOnly=true; Expires= + ${getExpireTime()}`)
                     userDataBase[token] = userName
-                    if (redirectUrl) {
-                        res.writeHead(302, { 'Location': `http://${redirectUrl}` })
+                    console.log('[p0] redirectUrl', redirectUrl.slice(0, redirectUrl.length - 1))
+                    if (redirectUrl && redirectUrl !== '/') {
+                        res.writeHead(302, { 'Location': `http://${redirectUrl.slice(0, redirectUrl.length - 1)}?token=${token}` })
                         res.end('redirecting...')
                         return
                     }

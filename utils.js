@@ -8,6 +8,7 @@ function getExpireTime() {
 }
 
 function doesTokenExist(cookie) {
+    if (!cookie) return
     cookie = cookie.split(';').map(e => {
         let kv = e.trim().split('=')
         return {
@@ -19,6 +20,7 @@ function doesTokenExist(cookie) {
 }
 
 function getCookieObj(cookie) {
+    if (!cookie) return
     let cookieObj = {}
     cookie = cookie.split(';').forEach(e => {
         let kv = e.trim().split('=')
