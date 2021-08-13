@@ -1,5 +1,4 @@
 const http = require('http')
-const fs = require('fs')
 const { doesTokenExist, getCookieObj, getParam, getExpireTime } = require('../utils.js')
 const Axios = require('axios')
 const ejs = require('ejs')
