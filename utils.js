@@ -2,24 +2,19 @@ const { builtinModules } = require("module")
 
 function getExpireTime() {
     let date = new Date()
-    let expireDays = 10
-    date.setTime(date.getTime() + 30 * 1000)
+    let expireSeconds = 30
+    date.setTime(date.getTime() + expireSeconds * 1000)
     return date.toGMTString()
 }
 
 function doesTokenExist(cookie) {
-    if (!cookie) return
-    cookie = cookie.split(';').map(e => {
-        let kv = e.trim().split('=')
-        return {
-            [kv[0]]: kv[1]
-        }
-    })
-    let index = cookie.findIndex(e => e.token === 'logInSuccessfulToken')
-    return index !== -1
+    let cookieObj = getCookieObj(cookie)
+    let token = cookieObj && cookieObj.token
+    return !!token
 }
 
 function getCookieObj(cookie) {
+    console.log('[p0] cookie', cookie)
     if (!cookie) return
     let cookieObj = {}
     cookie = cookie.split(';').forEach(e => {
@@ -30,20 +25,8 @@ function getCookieObj(cookie) {
 }
 
 function getRedirectUrl(url) {
-    let query = url.split('?')[1]
-    if (!query) {
-        return
-    }
-    let queryList = query.split('&').map(e => {
-        kv = e.trim().split('=')
-        return {
-            [kv[0]]: kv[1]
-        }
-    })
-    let index = queryList.findIndex(e => e.redirectUrl)
-    if (index !== -1) {
-        return queryList[index].redirectUrl
-    }
+    let param = getParam(url)
+    return param.redirectUrl
 }
 
 function getParam(url) {

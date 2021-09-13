@@ -10,10 +10,8 @@ function verifyTokenAndRender(token, req, res) {
         }
     }).then(response => {
         if (response.data.code === 200) {
-            console.log('response data', response.data)
             const filePath = './view/b.ejs'
 
-            console.log('[p1] req.headers', req.headers)
             res.setHeader('Set-Cookie',`token=${token}; Expires=${getExpireTime()}; domain=${req.headers.host.replace(/:\d+/,'')}; httpOnly=true`)
             ejs.renderFile(filePath, { userName: response.data.userName }, null, function (err, string) {
                 if (err) {
@@ -42,10 +40,8 @@ http.createServer((req, res) => {
 
             if (doesTokenExist(req.headers.cookie)) {
                 let cookieObj = getCookieObj(req.headers.cookie)
-                console.log('[p0] cookieObj', cookieObj)
                 verifyTokenAndRender(cookieObj.token, req, res)
             } else {
-                console.log('[p1] cookieObj', getCookieObj(req.headers.cookie))
                 res.writeHead(302, { 'Location': 'http://my-login.ke.com:3000/login?redirectUrl=' + req.headers.host }) // 重定向
                 res.end('<div>未登录</div>')
             }
