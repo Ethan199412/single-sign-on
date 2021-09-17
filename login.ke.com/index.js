@@ -48,7 +48,7 @@ http.createServer((req, res) => {
                 data = querystring.parse(data)
                 const { userName, password, redirectUrl } = data
                 if (userName === 'Ethan' && password === '123456') {
-                    res.setHeader('Set-Cookie', `token=${token}; domain=ke.com; httpOnly=true; Expires= + ${getExpireTime()}`)
+                    res.setHeader('Set-Cookie', `token=${token}; domain=my-login.ke.com; httpOnly=true; Expires= + ${getExpireTime()}`)
                     userDataBase[token] = userName
                     if (redirectUrl && redirectUrl !== '/') {
                         res.writeHead(302, { 'Location': `http://${redirectUrl.slice(0, redirectUrl.length - 1)}?token=${token}` })

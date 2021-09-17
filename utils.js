@@ -2,7 +2,7 @@ const { builtinModules } = require("module")
 
 function getExpireTime() {
     let date = new Date()
-    let expireSeconds = 30
+    let expireSeconds = 60
     date.setTime(date.getTime() + expireSeconds * 1000)
     return date.toGMTString()
 }
